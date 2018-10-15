@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -30,19 +31,24 @@ public:
 
     void callMain();
     Value callFunction(int ident);
+
+    void say(const Value &value) const;
 private:
     GameData data;
 };
 
 void Runner::callMain() {
     Value v = callFunction(data.mainFunction);
-    std::cout << "\nMAIN RETURNED: " << v.type << ' ' << v.value << '\n';
+    std::cout << "\nMAIN RETURNED: ";
+    say(v);
+    std::cout << '\n';
 }
 
 Value Runner::callFunction(int ident) {
     const FunctionDef &function = data.getFunction(ident);
     const ByteStream &code = data.bytecode;
 
+    std::vector<Value> locals(function.arg_count + function.local_count);
     std::vector<Value> stack;
     unsigned ip = function.position;
     int opcode, intValue;
@@ -90,18 +96,16 @@ Value Runner::callFunction(int ident) {
             case Opcode::Say:
                 if (stack.empty()) throw RuntimeError("Stack underflow.");
                 value = stack.back(); stack.pop_back();
-                switch(value.type) {
-                    case Value::String: {
-                        const StringDef &stringDef = data.getString(value.value);
-                        std::cout << stringDef.text;
-                        break;
+                if (value.type == Value::LocalVar) {
+                    if (value.value < 0 || value.value >= static_cast<int>(locals.size())) {
+                        std::stringstream ss;
+                        ss << "Tried to access non-existant local ";
+                        ss << value.value << '.';
+                        throw RuntimeError(ss.str());
                     }
-                    case Value::Integer:
-                        std::cout << value.value;
-                        break;
-                    default:
-                        std::cout << '<' << value.type << ' ' << value.value << '>';
+                    value = locals[value.value];
                 }
+                say(value);
                 break;
             default: {
                 std::stringstream ss;
@@ -112,6 +116,25 @@ Value Runner::callFunction(int ident) {
     }
 
     return Value{};
+}
+
+void Runner::say(const Value &value) const {
+    switch(value.type) {
+        case Value::String: {
+            const StringDef &stringDef = data.getString(value.value);
+            std::cout << stringDef.text;
+            break;
+        }
+        case Value::Integer:
+            std::cout << value.value;
+            break;
+        default:
+            std::cout << '<' << value.type;
+            if (value.type != Value::None) {
+                std::cout << ' ' << value.value;
+            }
+            std::cout << '>';
+    }
 }
 
 int main(int argc, char *argv[]) {

@@ -13,6 +13,7 @@ struct Value {
         Node        = 5,
         Object      = 6,
         Property    = 7,
+        LocalVar    = 8,
         Symbol      = 99
     };
 

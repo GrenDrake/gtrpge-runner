@@ -148,7 +148,7 @@ void GameData::dump() const {
     bytecode.dump(std::cout, 0);
 }
 
-const FunctionDef& GameData::getFunction(int ident) {
+const FunctionDef& GameData::getFunction(int ident) const {
     auto functionIter = functions.find(ident);
     if (functionIter == functions.end()) {
         std::stringstream ss;
@@ -158,7 +158,7 @@ const FunctionDef& GameData::getFunction(int ident) {
     return functionIter->second;
 }
 
-const StringDef& GameData::getString(int ident) {
+const StringDef& GameData::getString(int ident) const {
     auto stringIter = strings.find(ident);
     if (stringIter == strings.end()) {
         std::stringstream ss;

@@ -38,8 +38,8 @@ struct GameData {
     void load(const std::string filename);
     void dump() const;
 
-    const FunctionDef& getFunction(int ident);
-    const StringDef& getString(int ident);
+    const FunctionDef& getFunction(int ident) const;
+    const StringDef& getString(int ident) const;
 
     bool gameLoaded;
     int mainFunction;
