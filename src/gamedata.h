@@ -39,6 +39,7 @@ struct GameData {
     void dump() const;
 
     const FunctionDef& getFunction(int ident) const;
+    const ObjectDef& getObject(int ident) const;
     const StringDef& getString(int ident) const;
 
     bool gameLoaded;

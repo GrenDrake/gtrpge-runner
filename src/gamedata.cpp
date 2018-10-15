@@ -158,6 +158,16 @@ const FunctionDef& GameData::getFunction(int ident) const {
     return functionIter->second;
 }
 
+const ObjectDef& GameData::getObject(int ident) const {
+    auto objectIter = objects.find(ident);
+    if (objectIter == objects.end()) {
+        std::stringstream ss;
+        ss << "Tried to access non-existant object " << ident << '.';
+        throw RuntimeError(ss.str());
+    }
+    return objectIter->second;
+}
+
 const StringDef& GameData::getString(int ident) const {
     auto stringIter = strings.find(ident);
     if (stringIter == strings.end()) {

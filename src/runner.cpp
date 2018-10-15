@@ -19,6 +19,7 @@ namespace Opcode {
         Push16       = 5,
         Push32       = 6,
         Say          = 10,
+        GetProp      = 20,
     };
 };
 
@@ -107,6 +108,22 @@ Value Runner::callFunction(int ident) {
                 }
                 say(value);
                 break;
+            case Opcode::GetProp: {
+                Value objectId = stack.back(); stack.pop_back();
+                Value propId = stack.back(); stack.pop_back();
+                if (objectId.type != Value::Object)
+                    throw RuntimeError("Tried to get property of non-object.");
+                if (propId.type != Value::Property)
+                    throw RuntimeError("Tried to get non-property of.");
+                const ObjectDef &object = data.getObject(objectId.value);
+                auto propertyIter = object.properties.find(propId.value);
+                if (propertyIter == object.properties.end()) {
+                    stack.push_back(Value{Value::Integer, 0});
+                } else {
+                    stack.push_back(propertyIter->second);
+                }
+                break;
+            }
             default: {
                 std::stringstream ss;
                 ss << "Unknown opcode " << opcode << " at code position " << ip << '.';
