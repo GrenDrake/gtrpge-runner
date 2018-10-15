@@ -15,6 +15,9 @@ public:
     int read_8(unsigned where) const;
     int read_16(unsigned where) const;
     int read_32(unsigned where) const;
+    void overwrite_8(unsigned where, uint32_t value);
+    void overwrite_16(unsigned where, uint32_t value);
+    void overwrite_32(unsigned where, uint32_t value);
     unsigned size() const;
     void write(std::ostream &out) const;
 

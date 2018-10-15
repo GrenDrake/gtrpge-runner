@@ -58,6 +58,25 @@ int ByteStream::read_32(unsigned where) const {
     return value;
 }
 
+void ByteStream::overwrite_8(unsigned where, uint32_t value) {
+    if (where >= data.size()) return;
+    data[where] = value;
+}
+
+void ByteStream::overwrite_16(unsigned where, uint32_t value) {
+    if (where + 1 >= data.size()) return;
+    data[where]     = value & 0xFF;
+    data[where + 1] = (value >> 8) & 0xFF;
+}
+
+void ByteStream::overwrite_32(unsigned where, uint32_t value) {
+    if (where + 3 >= data.size()) return;
+    data[where]     = value & 0xFF;
+    data[where + 1] = (value >> 8) & 0xFF;
+    data[where + 2] = (value >> 16) & 0xFF;
+    data[where + 3] = (value >> 24) & 0xFF;
+}
+
 unsigned ByteStream::size() const {
     return data.size();
 }
