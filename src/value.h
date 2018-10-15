@@ -14,6 +14,7 @@ struct Value {
         Object      = 6,
         Property    = 7,
         LocalVar    = 8,
+        JumpTarget  = 9,
         Symbol      = 99
     };
 

@@ -40,6 +40,12 @@ std::ostream& operator<<(std::ostream &out, const Value::Type &type) {
         case Value::Property:
             out << "Property";
             break;
+        case Value::LocalVar:
+            out << "LocalVar";
+            break;
+        case Value::JumpTarget:
+            out << "JumpTarget";
+            break;
         default:
             out << "(unhandled type)";
     }
