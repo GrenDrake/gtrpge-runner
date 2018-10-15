@@ -172,7 +172,7 @@ const StringDef& GameData::getString(int ident) const {
     auto stringIter = strings.find(ident);
     if (stringIter == strings.end()) {
         std::stringstream ss;
-        ss << "Tried to run non-existant string " << ident << '.';
+        ss << "Tried to access non-existant string " << ident << '.';
         throw RuntimeError(ss.str());
     }
     return stringIter->second;
