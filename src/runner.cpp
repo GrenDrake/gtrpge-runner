@@ -20,7 +20,20 @@ namespace Opcode {
         Push32       = 6,
         Store        = 7,
         Say          = 10,
+        StackkDup    = 14, // duplicate the top item on the stack
+        StackPeek    = 15, // peek at the stack item X items from the top
+        StackSize    = 16, // get the current size of the stack
+        Call         = 17, // call a value as a function
+        CallMethod   = 18, // call an object property as a function
+        Self         = 19, // get object the current function is a property of
         GetProp      = 20,
+        HasProp      = 21, // check if property is set on object
+        SetProp      = 22, // set object property to value
+        GetItem      = 23, // get item from list (index) or map (key)
+        HasItem      = 24, // check if index (for list) or key (for map) exists
+        GetSize      = 25, // get size of list or map
+        SetItem      = 26, // set item in list (by index) of map (by key)
+        TypeOf       = 27, // get value type
         Jump         = 30,
         JumpEq       = 31,
         JumpNeq      = 32,
@@ -28,6 +41,8 @@ namespace Opcode {
         JumpLte      = 34,
         JumpGt       = 35,
         JumpGte      = 36,
+        JumpTrue     = 37, // jump if value is non-zero (true)
+        JumpFalse    = 38, // jump if value is zero (false)
         Add          = 40,
         Sub          = 41,
         Mult         = 42,
@@ -43,7 +58,7 @@ public:
     }
 
     void callMain();
-    Value callFunction(int ident);
+    Value callFunction(int ident, const std::vector<Value> &arguments = {});
 
     void say(const Value &value) const;
 private:
@@ -90,12 +105,21 @@ void dumpStack(const std::vector<Value> &stack) {
     }
 }
 
-Value Runner::callFunction(int ident) {
+Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
     const FunctionDef &function = data.getFunction(ident);
     const ByteStream &code = data.bytecode;
 
+    if (arguments.size() > static_cast<unsigned>(function.arg_count)) {
+        throw RuntimeError("Too many arguments to function.");
+    }
+
     std::vector<Value> locals(function.arg_count + function.local_count);
     std::vector<Value> stack;
+
+    for (unsigned i = 0; i < arguments.size() && i < locals.size(); ++i) {
+        locals[i] = arguments[i];
+    }
+
     unsigned ip = function.position;
     int opcode, intValue;
     Value::Type type;
@@ -157,6 +181,31 @@ Value Runner::callFunction(int ident) {
                 value = readLocal(value, locals);
                 say(value);
                 break;
+
+            case Opcode::Call: {
+                Value functionId = popStack(stack);
+                Value argCount = popStack(stack);
+                if (argCount.type != Value::Integer) {
+                    throw RuntimeError("Argument count must be integer");
+                }
+                std::vector<Value> args;
+                for (int i = 0; i < argCount.value; ++i) {
+                    args.push_back(popStack(stack));
+                }
+                Value result;
+                switch(functionId.type) {
+                    case Value::Node:
+                        result = callFunction(functionId.value, args);
+                        break;
+                    default:
+                        std::stringstream ss;
+                        ss << "Value type " << functionId.type << " not callable.";
+                        throw RuntimeError(ss.str());
+                }
+                stack.push_back(result);
+                break;
+            }
+
             case Opcode::GetProp: {
                 Value objectId = popStack(stack);
                 Value propId = popStack(stack);
