@@ -1,6 +1,7 @@
 CXXFLAGS= -std=c++11 -g -Wall
 
-RUNNER_OBJS=src/runner.o src/bytestream.o src/value.o src/gamedata.o
+RUNNER_OBJS=src/runner.o src/bytestream.o src/value.o src/gamedata.o \
+			src/call_function.o
 RUNNER=./runner
 
 all: $(RUNNER)
