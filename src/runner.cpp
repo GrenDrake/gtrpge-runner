@@ -20,7 +20,8 @@ namespace Opcode {
         Push32       = 6,
         Store        = 7,
         Say          = 10,
-        StackkDup    = 14, // duplicate the top item on the stack
+        StackPop     = 13, // remove the top item from the stack
+        StackDup     = 14, // duplicate the top item on the stack
         StackPeek    = 15, // peek at the stack item X items from the top
         StackSize    = 16, // get the current size of the stack
         Call         = 17, // call a value as a function
@@ -181,6 +182,29 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 value = readLocal(value, locals);
                 say(value);
                 break;
+
+            case Opcode::StackPop: {
+                popStack(stack);
+                break;
+            }
+            case Opcode::StackDup: {
+                if (stack.empty()) throw RuntimeError("Stack underflow.");
+                stack.push_back(stack.back());
+                break;
+            }
+            case Opcode::StackPeek: {
+                Value depth = popStack(stack);
+                if (depth.type != Value::Integer) throw RuntimeError("stack-peek: depth must be integer.");
+                std::cout << depth.value << '\n';
+                if (depth.value >= stack.size()) throw RuntimeError("stack-peek: tried to peek beyond bottom of stack.");
+                stack.push_back(stack[depth.value]);
+                break;
+            }
+            case Opcode::StackSize: {
+                int stackSize = stack.size();
+                stack.push_back(Value{Value::Integer, stackSize});
+                break;
+            }
 
             case Opcode::Call: {
                 Value functionId = popStack(stack);
