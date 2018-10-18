@@ -213,8 +213,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             }
 
             case Opcode::GetProp: {
-                Value objectId = popStack(stack);
-                Value propId = popStack(stack);
+                Value objectId = readLocal(popStack(stack), locals);
+                Value propId = readLocal(popStack(stack), locals);
                 requireType("get-prop/object-id", objectId, Value::Object);
                 requireType("get-prop/prop-id", propId, Value::Property);
                 const ObjectDef &object = data.getObject(objectId.value);
