@@ -84,6 +84,13 @@ Value readLocal(const Value &value, const std::vector<Value> locals) {
     return value;
 }
 
+void requireType(const std::string &source, const Value &value, const Value::Type &type) {
+    if (value.type != type) {
+        std::stringstream ss;
+        ss << source << ": expected value of type " << type << ", but found " << value.type << '.';
+        throw RuntimeError(ss.str());
+    }
+}
 
 
 Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
@@ -147,9 +154,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             case Opcode::Store: {
                 Value localId = popStack(stack);
                 Value value = popStack(stack);
-                if (localId.type != Value::LocalVar) {
-                    throw RuntimeError("Tried to store to non-local.");
-                }
+                requireType("store/local-id", localId, Value::LocalVar);
                 if (localId.value < 0 || localId.value >= static_cast<int>(locals.size())) {
                     throw RuntimeError("Tried to store to non-existant local number.");
                 }
@@ -174,7 +179,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             }
             case Opcode::StackPeek: {
                 Value depth = popStack(stack);
-                if (depth.type != Value::Integer) throw RuntimeError("stack-peek: depth must be integer.");
+                requireType("stack-peek/depth", depth, Value::Integer);
                 if (depth.value >= stack.size()) throw RuntimeError("stack-peek: tried to peek beyond bottom of stack.");
                 stack.push_back(stack[depth.value]);
                 break;
@@ -188,9 +193,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             case Opcode::Call: {
                 Value functionId = popStack(stack);
                 Value argCount = popStack(stack);
-                if (argCount.type != Value::Integer) {
-                    throw RuntimeError("Argument count must be integer");
-                }
+                requireType("call/arg-count", argCount, Value::Integer);
                 std::vector<Value> args;
                 for (int i = 0; i < argCount.value; ++i) {
                     args.push_back(popStack(stack));
@@ -212,10 +215,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             case Opcode::GetProp: {
                 Value objectId = popStack(stack);
                 Value propId = popStack(stack);
-                if (objectId.type != Value::Object)
-                    throw RuntimeError("Tried to get property of non-object.");
-                if (propId.type != Value::Property)
-                    throw RuntimeError("Tried to get non-property of.");
+                requireType("get-prop/object-id", objectId, Value::Object);
+                requireType("get-prop/prop-id", propId, Value::Property);
                 const ObjectDef &object = data.getObject(objectId.value);
                 auto propertyIter = object.properties.find(propId.value);
                 if (propertyIter == object.properties.end()) {
@@ -231,9 +232,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-eq/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value == v1.value) {
                     ip = function.position + target.value;
                 }
@@ -244,9 +243,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-neq/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value <= v1.value) {
                     ip = function.position + target.value;
                 }
@@ -257,9 +254,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-lt/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value != v1.value) {
                     ip = function.position + target.value;
                 }
@@ -270,9 +265,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-lte/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value <= v1.value) {
                     ip = function.position + target.value;
                 }
@@ -283,9 +276,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-gt/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value > v1.value) {
                     ip = function.position + target.value;
                 }
@@ -296,9 +287,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v1 = popStack(stack);
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
-                if (target.type != Value::JumpTarget) {
-                    throw RuntimeError("Tried to jump to non-jump target");
-                }
+                requireType("jump-gte/target", target, Value::JumpTarget);
                 if (v1.type == v2.type && v2.value >= v1.value) {
                     ip = function.position + target.value;
                 }
@@ -310,9 +299,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = stack.back();
                 v1 = readLocal(v1, locals);
                 v2 = readLocal(v2, locals);
-                if (v1.type != Value::Integer || v2.type != Value::Integer) {
-                    throw RuntimeError("Can only add integer values.");
-                }
+                requireType("add/value-1", v1, Value::Integer);
+                requireType("add/value-2", v2, Value::Integer);
                 v2.value += v1.value;
                 stack[stack.size() - 1] = v2;
                 break;
@@ -322,9 +310,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = stack.back();
                 v1 = readLocal(v1, locals);
                 v2 = readLocal(v2, locals);
-                if (v1.type != Value::Integer || v2.type != Value::Integer) {
-                    throw RuntimeError("Can only subtract integer values.");
-                }
+                requireType("sub/value-1", v1, Value::Integer);
+                requireType("sub/value-2", v2, Value::Integer);
                 v2.value -= v1.value;
                 stack[stack.size() - 1] = v2;
                 break;
@@ -334,9 +321,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = stack.back();
                 v1 = readLocal(v1, locals);
                 v2 = readLocal(v2, locals);
-                if (v1.type != Value::Integer || v2.type != Value::Integer) {
-                    throw RuntimeError("Can only multiply integer values.");
-                }
+                requireType("mult/value-1", v1, Value::Integer);
+                requireType("mult/value-2", v2, Value::Integer);
                 v2.value *= v1.value;
                 stack[stack.size() - 1] = v2;
                 break;
@@ -346,9 +332,8 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = stack.back();
                 v1 = readLocal(v1, locals);
                 v2 = readLocal(v2, locals);
-                if (v1.type != Value::Integer || v2.type != Value::Integer) {
-                    throw RuntimeError("Can only divide integer values.");
-                }
+                requireType("div/value-1", v1, Value::Integer);
+                requireType("div/value-2", v2, Value::Integer);
                 v2.value /= v1.value;
                 stack[stack.size() - 1] = v2;
                 break;
