@@ -37,17 +37,15 @@ namespace Opcode {
         GetSize      = 25, // get size of list or map
         SetItem      = 26, // set item in list (by index) of map (by key)
         TypeOf       = 27, // get value type
-        CompareTypes = 28, // compare the types of two values and push the result
-        Compare      = 29, // compare two values and push the result
-        Jump         = 30,
-        JumpEq       = 31,
-        JumpNeq      = 32,
-        JumpLt       = 33,
-        JumpLte      = 34,
-        JumpGt       = 35,
-        JumpGte      = 36,
-        JumpTrue     = 37, // jump if value is non-zero (true)
-        JumpFalse    = 38, // jump if value is zero (false)
+        CompareTypes        = 30, // compare the types of two values and push the result
+        Compare             = 31, // compare two values and push the result
+        Jump                = 32, // unconditional jump
+        JumpZero            = 33, // jump if top of stack == 0
+        JumpNotZero         = 34, // jump if top of stack != 0
+        JumpLessThan        = 35, // jump if top of stack < 0
+        JumpLessThanEqual   = 36, // jump if top of stack <= 0
+        JumpGreaterThan     = 37, // jump if top of stack > 0
+        JumpGreaterThanEqual= 38, // jump if top of stack >= 0
         Add          = 40,
         Sub          = 41,
         Mult         = 42,
@@ -266,74 +264,60 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
 
             case Opcode::Jump: {
                 Value target = readLocal(popStack(stack), locals);
-                requireType("jump-eq/target", target, Value::JumpTarget);
+                requireType("jmp/target", target, Value::JumpTarget);
                 ip = function.position + target.value;
                 break;
             }
-            case Opcode::JumpEq: {
+            case Opcode::JumpZero: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-eq/target", target, Value::JumpTarget);
-                if (v1.type == v2.type && v2.value == v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jz/target", target, Value::JumpTarget);
+                if (value.value == 0) {
                     ip = function.position + target.value;
                 }
                 break;
             }
-            case Opcode::JumpNeq: {
+            case Opcode::JumpNotZero: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-neq/target", target, Value::JumpTarget);
-                if (v1.type != v2.type || v2.value != v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jnz/target", target, Value::JumpTarget);
+                if (value.value != 0) {
                     ip = function.position + target.value;
                 }
                 break;
             }
-            case Opcode::JumpLt: {
+            case Opcode::JumpLessThan: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-lt/target", target, Value::JumpTarget);
-                requireType("jump-lt/value-1", v1, Value::Integer);
-                requireType("jump-lt/value-2", v2, Value::Integer);
-                if (v1.type == v2.type && v2.value < v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jlt/target", target, Value::JumpTarget);
+                if (value.value < 0) {
                     ip = function.position + target.value;
                 }
                 break;
             }
-            case Opcode::JumpLte: {
+            case Opcode::JumpLessThanEqual: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-lte/target", target, Value::JumpTarget);
-                requireType("jump-lte/value-1", v1, Value::Integer);
-                requireType("jump-lte/value-2", v2, Value::Integer);
-                if (v1.type == v2.type && v2.value <= v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jlte/target", target, Value::JumpTarget);
+                if (value.value <= 0) {
                     ip = function.position + target.value;
                 }
                 break;
             }
-            case Opcode::JumpGt: {
+            case Opcode::JumpGreaterThan: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-gt/target", target, Value::JumpTarget);
-                requireType("jump-gt/value-1", v1, Value::Integer);
-                requireType("jump-gt/value-2", v2, Value::Integer);
-                if (v1.type == v2.type && v2.value > v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jgt/target", target, Value::JumpTarget);
+                if (value.value > 0) {
                     ip = function.position + target.value;
                 }
                 break;
             }
-            case Opcode::JumpGte: {
+            case Opcode::JumpGreaterThanEqual: {
                 Value target = readLocal(popStack(stack), locals);
-                Value v1 = readLocal(popStack(stack), locals);
-                Value v2 = readLocal(popStack(stack), locals);
-                requireType("jump-gte/target", target, Value::JumpTarget);
-                requireType("jump-gte/value-1", v1, Value::Integer);
-                requireType("jump-gte/value-2", v2, Value::Integer);
-                if (v1.type == v2.type && v2.value >= v1.value) {
+                Value value = readLocal(popStack(stack), locals);
+                requireType("jgte/target", target, Value::JumpTarget);
+                if (value.value >= 0) {
                     ip = function.position + target.value;
                 }
                 break;
