@@ -20,6 +20,8 @@ namespace Opcode {
         Push32       = 6,
         Store        = 7,
         Say          = 10,
+        SayUnsigned  = 11,
+        SayChar      = 12,
         StackPop     = 13, // remove the top item from the stack
         StackDup     = 14, // duplicate the top item on the stack
         StackPeek    = 15, // peek at the stack item X items from the top
@@ -168,6 +170,12 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 value = popStack(stack);
                 value = readLocal(value, locals);
                 say(value);
+                break;
+            case Opcode::SayUnsigned:
+                value = popStack(stack);
+                value = readLocal(value, locals);
+                requireType("say-unsigned/value", value, Value::Integer);
+                say(static_cast<unsigned>(value.value));
                 break;
 
             case Opcode::StackPop: {
