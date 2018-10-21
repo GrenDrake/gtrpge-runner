@@ -227,6 +227,12 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 break;
             }
 
+            case Opcode::Jump: {
+                Value target = readLocal(popStack(stack), locals);
+                requireType("jump-eq/target", target, Value::JumpTarget);
+                ip = function.position + target.value;
+                break;
+            }
             case Opcode::JumpEq: {
                 Value target = popStack(stack);
                 Value v1 = popStack(stack);
