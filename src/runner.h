@@ -16,6 +16,7 @@ public:
     void callMain();
     Value callFunction(int ident, const std::vector<Value> &arguments = {});
 
+    void say(unsigned intValue) const;
     void say(const Value &value) const;
 private:
     GameData data;

@@ -17,6 +17,10 @@ void Runner::callMain() {
     std::cout << '\n';
 }
 
+void Runner::say(unsigned intValue) const {
+    std::cout << intValue;
+}
+
 void Runner::say(const Value &value) const {
     switch(value.type) {
         case Value::String: {
