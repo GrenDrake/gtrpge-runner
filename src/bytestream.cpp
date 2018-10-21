@@ -31,12 +31,12 @@ void ByteStream::padTo(unsigned toMultiple) {
     }
 }
 
-int ByteStream::read_8(unsigned where) const {
+uint8_t ByteStream::read_8(unsigned where) const {
     if (where > data.size()) return 0;
     return data[where];
 }
 
-int ByteStream::read_16(unsigned where) const {
+uint16_t ByteStream::read_16(unsigned where) const {
     if (where + 1 > data.size()) return 0;
     uint32_t value = 0;
     value |= data[where];
@@ -45,7 +45,7 @@ int ByteStream::read_16(unsigned where) const {
     return value;
 }
 
-int ByteStream::read_32(unsigned where) const {
+uint32_t ByteStream::read_32(unsigned where) const {
     if (where + 3 > data.size()) return 0;
     uint32_t value = 0;
     value |= data[where];

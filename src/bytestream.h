@@ -12,9 +12,9 @@ public:
     void add_32(uint32_t value);
     void append(const ByteStream &other);
     void padTo(unsigned toMultiple);
-    int read_8(unsigned where) const;
-    int read_16(unsigned where) const;
-    int read_32(unsigned where) const;
+    uint8_t read_8(unsigned where) const;
+    uint16_t read_16(unsigned where) const;
+    uint32_t read_32(unsigned where) const;
     void overwrite_8(unsigned where, uint32_t value);
     void overwrite_16(unsigned where, uint32_t value);
     void overwrite_32(unsigned where, uint32_t value);
