@@ -141,11 +141,13 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             case Opcode::Push8:
                 type = static_cast<Value::Type>(code.read_8(ip++));
                 intValue = code.read_8(ip++);
+                if (intValue & 0x80) intValue |= 0xFFFFFF00;
                 stack.push_back(Value{type, intValue});
                 break;
             case Opcode::Push16:
                 type = static_cast<Value::Type>(code.read_8(ip++));
                 intValue = code.read_16(ip);
+                if (intValue & 0x8000) intValue |= 0xFFFF0000;
                 ip += 2;
                 stack.push_back(Value{type, intValue});
                 break;
