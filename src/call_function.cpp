@@ -35,6 +35,8 @@ namespace Opcode {
         GetSize      = 25, // get size of list or map
         SetItem      = 26, // set item in list (by index) of map (by key)
         TypeOf       = 27, // get value type
+        CompareTypes = 28, // compare the types of two values and push the result
+        Compare      = 29, // compare two values and push the result
         Jump         = 30,
         JumpEq       = 31,
         JumpNeq      = 32,
@@ -224,6 +226,31 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 } else {
                     stack.push_back(propertyIter->second);
                 }
+                break;
+            }
+
+            case Opcode::CompareTypes: {
+                Value v1 = readLocal(popStack(stack), locals);
+                Value v2 = readLocal(popStack(stack), locals);
+                if (v1.type != v2.type) {
+                    stack.push_back(Value{Value::Integer, 1});
+                } else {
+                    stack.push_back(Value{Value::Integer, 0});
+                }
+                break;
+            }
+            case Opcode::Compare: {
+                Value v1 = readLocal(popStack(stack), locals);
+                Value v2 = readLocal(popStack(stack), locals);
+                if (v1.type != v2.type) {
+                    std::stringstream ss;
+                    ss << "Tried to compare values of different types (";
+                    ss << v1.type << " and " << v2.type << ").";
+                    throw RuntimeError(ss.str());
+                }
+                Value result = Value{Value::Integer};
+                result.value = v2.value - v1.value;
+                stack.push_back(result);
                 break;
             }
 
