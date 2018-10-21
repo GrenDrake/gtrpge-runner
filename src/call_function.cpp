@@ -180,7 +180,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
             case Opcode::StackPeek: {
                 Value depth = popStack(stack);
                 requireType("stack-peek/depth", depth, Value::Integer);
-                if (depth.value >= stack.size()) throw RuntimeError("stack-peek: tried to peek beyond bottom of stack.");
+                if (depth.value >= static_cast<int>(stack.size())) throw RuntimeError("stack-peek: tried to peek beyond bottom of stack.");
                 stack.push_back(stack[depth.value]);
                 break;
             }
@@ -244,7 +244,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
                 requireType("jump-neq/target", target, Value::JumpTarget);
-                if (v1.type == v2.type && v2.value <= v1.value) {
+                if (v1.type != v2.type || v2.value != v1.value) {
                     ip = function.position + target.value;
                 }
                 break;
@@ -255,7 +255,7 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 Value v2 = popStack(stack);
                 v1 = readLocal(v1, locals); v2 = readLocal(v2, locals);
                 requireType("jump-lt/target", target, Value::JumpTarget);
-                if (v1.type == v2.type && v2.value != v1.value) {
+                if (v1.type == v2.type && v2.value < v1.value) {
                     ip = function.position + target.value;
                 }
                 break;
