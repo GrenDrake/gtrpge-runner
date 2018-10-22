@@ -50,6 +50,7 @@ namespace Opcode {
         Sub          = 41,
         Mult         = 42,
         Div          = 43,
+        WaitKey             = 50,
     };
 };
 
@@ -365,6 +366,17 @@ Value Runner::callFunction(int ident, const std::vector<Value> &arguments) {
                 requireType("div/value-2", v2, Value::Integer);
                 v2.value /= v1.value;
                 stack[stack.size() - 1] = v2;
+                break;
+            }
+
+            case Opcode::WaitKey: {
+                std::string input;
+                std::cin >> input;
+                if (!input.empty()) {
+                    stack.push_back(Value{Value::Integer, input[0]});
+                } else {
+                    stack.push_back(Value{Value::None});
+                }
                 break;
             }
 
